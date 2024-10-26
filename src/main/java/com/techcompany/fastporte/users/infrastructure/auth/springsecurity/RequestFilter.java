@@ -7,6 +7,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,6 +23,9 @@ import java.util.Collections;
 @Component
 public class RequestFilter extends OncePerRequestFilter {
 
+    @Value("${internal.api.key}")
+    String INTERNAL_API_KEY;
+
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
 
@@ -34,13 +38,11 @@ public class RequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        String serverName = request.getServerName();  // Obtiene el nombre del host
-        int serverPort = request.getServerPort();     // Obtiene el puerto del servidor
+        final String internalApiKey = request.getHeader("X-Internal-API-Key");
 
-        if (isInternalRequest(serverName, serverPort)) {
-            // Omitir validación de JWT para solicitudes de localhost:8080 o del url desplegado
-            //chain.doFilter(request, response);
+        if (INTERNAL_API_KEY.equals(internalApiKey)) {
             setAdminRoleForInternalRequest(request);
+
         } else {
 
             final String authorizationHeader = request.getHeader("Authorization");
@@ -64,11 +66,6 @@ public class RequestFilter extends OncePerRequestFilter {
             }
         }
         chain.doFilter(request, response);
-    }
-
-    private boolean isInternalRequest(String serverName, int serverPort) {
-        return ("localhost".equals(serverName) && serverPort == 8080)
-                || EnvironmentConstants.CURRENT_ENV_URL.equals(serverName);
     }
 
     private void setAdminRoleForInternalRequest(HttpServletRequest request) {

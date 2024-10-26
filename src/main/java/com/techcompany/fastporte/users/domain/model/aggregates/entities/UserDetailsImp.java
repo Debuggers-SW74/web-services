@@ -2,6 +2,7 @@ package com.techcompany.fastporte.users.domain.model.aggregates.entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -10,23 +11,13 @@ import java.util.Map;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class UserDetailsImp implements UserDetails {
 
     private String username;
     private String password;
     private Long userId;
     private Collection<? extends GrantedAuthority> authorities;
-
-    /*public static UserDetailsImpl build(User user) {
-        List<GrantedAuthority> authorityList =
-                user.getRoles().stream().map(
-                        role -> new SimpleGrantedAuthority(
-                                role.getRoleName().name())).collect(Collectors.toList());
-        return new UserDetailsImpl(
-                user.getUsername(),
-                user.getPassword(),
-                authorityList);
-    }*/
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

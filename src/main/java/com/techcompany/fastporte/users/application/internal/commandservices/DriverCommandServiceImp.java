@@ -10,6 +10,7 @@ import com.techcompany.fastporte.users.domain.services.driver.DriverCommandServi
 import com.techcompany.fastporte.users.infrastructure.persistence.jpa.DriverRepository;
 import com.techcompany.fastporte.users.infrastructure.persistence.jpa.RoleRepository;
 import com.techcompany.fastporte.users.infrastructure.persistence.jpa.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,11 +24,13 @@ public class DriverCommandServiceImp implements DriverCommandService {
     private final UserRepository userRepository;
     private final DriverRepository driverRepository;
     private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public DriverCommandServiceImp(UserRepository userRepository, DriverRepository driverRepository, RoleRepository roleRepository) {
+    public DriverCommandServiceImp(UserRepository userRepository, DriverRepository driverRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.driverRepository = driverRepository;
         this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -46,7 +49,7 @@ public class DriverCommandServiceImp implements DriverCommandService {
         user.setRoles(Set.of(driverRole));
 
         // Cifrar la contraseña del usuario antes de guardarlo
-        //user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         User savedUser = userRepository.save(driver.getUser());
 

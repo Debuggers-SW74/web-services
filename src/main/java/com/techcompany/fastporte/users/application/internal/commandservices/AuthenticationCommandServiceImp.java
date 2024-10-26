@@ -28,15 +28,11 @@ public class AuthenticationCommandServiceImp implements AuthenticationCommandSer
     public String handle(AuthenticateAccountCommand command) {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(command.username(), command.password()));
-
             final UserDetailsImp userDetails = (UserDetailsImp) userDetailsService.loadUserByUsername(command.username());
-            if(userDetails != null) {
-                return jwtUtil.generateToken(userDetails.getUsername(), userDetails.getUserId());
-            } else {
-                return "";
-            }
+            return jwtUtil.generateToken(userDetails.getUsername(), userDetails.getUserId());
+
         } catch (Exception e) {
-            System.out.println("User not found: " + command.username());
+            System.out.println("User not found: " + e.getMessage());
             return null;
         }
     }

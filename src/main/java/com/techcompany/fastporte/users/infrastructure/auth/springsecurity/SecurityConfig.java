@@ -1,6 +1,5 @@
 package com.techcompany.fastporte.users.infrastructure.auth.springsecurity;
 
-import com.techcompany.fastporte.shared.utils.EnvironmentConstants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -54,7 +53,6 @@ public class SecurityConfig {
         http.authorizeHttpRequests(
                 authorizeRequests -> authorizeRequests
                         .requestMatchers(WHITE_LIST_URL).permitAll() // Permitir acceso público a la ruta /authenticate
-                        .requestMatchers(request -> isInternalRequest(request.getServerName(), request.getServerPort())).permitAll()
                         .anyRequest().authenticated());
 
         // Configurar la política de manejo de sesión
@@ -71,8 +69,4 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    private boolean isInternalRequest(String serverName, int serverPort) {
-        return ("localhost".equals(serverName) && serverPort == 8080)
-                || EnvironmentConstants.CURRENT_ENV_URL.equals(serverName);
-    }
 }

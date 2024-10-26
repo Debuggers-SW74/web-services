@@ -13,7 +13,7 @@ public class DriverInformationResourceFromEntityAssembler {
                 driver.getUser().getSecondLastName(),
                 driver.getUser().getEmail(),
                 driver.getUser().getPhone(),
-                "[Private]"
+                driver.getUser().getUsername()
         );
     }
 
@@ -26,6 +26,7 @@ public class DriverInformationResourceFromEntityAssembler {
                 driver.getUser().getEmail(),
                 driver.getUser().getPhone(),
                 driver.getUser().getUsername()
+                //ToDo: Add more fields
         );
     }
 }

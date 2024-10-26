@@ -1,6 +1,7 @@
 package com.techcompany.fastporte.users.interfaces.rest;
 
 import com.techcompany.fastporte.users.domain.model.aggregates.entities.Driver;
+import com.techcompany.fastporte.users.domain.model.aggregates.entities.UserDetailsImp;
 import com.techcompany.fastporte.users.domain.model.commands.driver.DeleteDriverCommand;
 import com.techcompany.fastporte.users.domain.model.queries.driver.GetAllDriversByIdInList;
 import com.techcompany.fastporte.users.domain.model.queries.driver.GetAllDriversQuery;
@@ -15,6 +16,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,19 +35,12 @@ public class DriverController {
         this.driverQueryService = driverQueryService;
     }
 
-    //@PreAuthorize("hasRole('ROLE_DRIVER')")
+    @PreAuthorize("hasRole('ROLE_DRIVER') or hasRole('ROLE_SUPERVISOR') or hasRole('ROLE_ADMIN') ")
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> findById(@PathVariable Long id/*, @AuthenticationPrincipal UserDetailsImpl userDetails*/) {
+    public ResponseEntity<?> findById(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImp userDetails) {
 
         try {
-            /*if (userDetails.getUserId().equals(id)) {
-                Optional<DriverPrivateProfileDto> privateProfile = driverService.getPrivateProfile(id);
-                return privateProfile.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
 
-            } else {
-                Optional<DriverPublicProfileDto> publicProfile = driverService.getPublicProfile(id);
-                return publicProfile.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-            }*/
             Optional<Driver> driver = driverQueryService.handle(new GetDriverByIdQuery(id));
 
             if (driver.isPresent()) {
@@ -58,7 +54,7 @@ public class DriverController {
         }
     }
 
-    //@PreAuthorize("hasRole('ROLE_DRIVER')")
+    @PreAuthorize("hasRole('ROLE_DRIVER') or hasRole('ROLE_SUPERVISOR') or hasRole('ROLE_ADMIN') ")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<DriverInformationResource>> findAll() {
         try{
@@ -79,6 +75,7 @@ public class DriverController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/batch")
     public ResponseEntity<List<DriverInformationResource>> findAllByIdIn(@RequestBody List<Long> driverIds) {
         List<Driver> drivers = driverQueryService.handle(new GetAllDriversByIdInList(driverIds));
@@ -104,7 +101,7 @@ public class DriverController {
         }
     }
 
-    //@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_DRIVER')")
+    @PreAuthorize("hasRole('ROLE_DRIVER') or hasRole('ROLE_ADMIN')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         try {

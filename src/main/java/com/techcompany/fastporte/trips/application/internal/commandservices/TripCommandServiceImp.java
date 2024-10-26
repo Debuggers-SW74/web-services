@@ -1,6 +1,7 @@
 package com.techcompany.fastporte.trips.application.internal.commandservices;
 
 import com.techcompany.fastporte.shared.dtos.DriverInformationDto;
+import com.techcompany.fastporte.shared.dtos.SupervisorInformationDto;
 import com.techcompany.fastporte.trips.application.dtos.TripInformationDto;
 import com.techcompany.fastporte.trips.domain.model.aggregates.entities.Trip;
 import com.techcompany.fastporte.trips.domain.model.aggregates.entities.TripStatus;
@@ -9,6 +10,7 @@ import com.techcompany.fastporte.trips.domain.model.commands.CreateTripCommand;
 import com.techcompany.fastporte.trips.domain.model.commands.DeleteTripCommand;
 import com.techcompany.fastporte.trips.domain.services.TripCommandService;
 import com.techcompany.fastporte.trips.infrastructure.acl.DriverAcl;
+import com.techcompany.fastporte.trips.infrastructure.acl.SupervisorAcl;
 import com.techcompany.fastporte.trips.infrastructure.persistence.jpa.TripRepository;
 import com.techcompany.fastporte.trips.infrastructure.persistence.jpa.TripStatusRepository;
 import org.springframework.stereotype.Service;
@@ -23,11 +25,13 @@ public class TripCommandServiceImp implements TripCommandService {
     private final TripRepository tripRepository;
     private final TripStatusRepository tripStatusRepository;
     private final DriverAcl driverAcl;
+    private final SupervisorAcl supervisorAcl;
 
-    public TripCommandServiceImp(TripRepository tripRepository, TripStatusRepository tripStatusRepository, DriverAcl driverAcl) {
+    public TripCommandServiceImp(TripRepository tripRepository, TripStatusRepository tripStatusRepository, DriverAcl driverAcl, SupervisorAcl supervisorAcl) {
         this.tripRepository = tripRepository;
         this.tripStatusRepository = tripStatusRepository;
         this.driverAcl = driverAcl;
+        this.supervisorAcl = supervisorAcl;
     }
 
     @Override
@@ -45,7 +49,10 @@ public class TripCommandServiceImp implements TripCommandService {
         // Verificar si el conductor existe
         Optional<DriverInformationDto> driver = driverAcl.findDriverById(trip.getDriverId());
 
-        if (driver.isPresent()) {
+        // Verificar si el supervisor existe
+        Optional<SupervisorInformationDto> supervisor = supervisorAcl.findSupervisorById(trip.getSupervisorId());
+
+        if (driver.isPresent() && supervisor.isPresent()) {
             // Persistir el viaje
             trip = tripRepository.save(trip);
 
@@ -54,6 +61,8 @@ public class TripCommandServiceImp implements TripCommandService {
                     .tripId(trip.getId())
                     .driverId(driver.get().id())
                     .driverName(driver.get().name() + " " + driver.get().firstLastName() + " " + driver.get().secondLastName())
+                    .supervisorId(supervisor.get().id())
+                    .supervisorName(supervisor.get().name() + " " + supervisor.get().firstLastName() + " " + supervisor.get().secondLastName())
                     .origin(trip.getOrigin())
                     .destination(trip.getDestination())
                     .startTime(trip.getStartTime())

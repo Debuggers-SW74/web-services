@@ -4,6 +4,8 @@ public record TripInformationResource(
         Long tripId,
         Long driverId,
         String driverName,
+        Long supervisorId,
+        String supervisorName,
         String origin,
         String destination,
         String startTime,
